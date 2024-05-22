@@ -1,0 +1,76 @@
+{% extends "templateexpresiones.html" %}
+
+{% block content %}
+<div class="content-panel">
+    <a href="expresiones/ver" class="btn btn-danger mb-3">AGREGAR EXPRESION</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <div class="table-container">
+        <table id="tabla" class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nro</th>
+                    <th>Expresiones</th>
+                    <th>Acciones</th>
+                    <th>Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in lista %}
+                <tr id="expresion_{{ item.id }}"> <!-- Agregamos el ID único -->
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.expresionObtenida }}</td>
+                    <td>
+                        <div class="d-flex">
+                            <a class="btn btn-primary btn-sm me-2">Agregar Expresion</a>
+                            <form id="eliminar_form_{{ item.id }}" action="/expresiones/eliminar/{{ item.id }}"
+                                method="POST">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="expresiones" class="btn btn-secondary btn-sm">Ver Expresiones</a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('form[id^="eliminar_form_"]').submit(function (event) {
+            event.preventDefault();
+            var form = $(this);
+            var expresion_id = form.attr('id').split('_')[2];
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    // Eliminar la fila de la tabla
+                    $('#expresion_' + expresion_id).remove();
+                    // Mostrar mensaje de confirmación
+                    alert("Expresion eliminada correctamente.");
+                },
+                error: function (xhr, status, error) {
+                    // Manejar errores
+                    alert('Error: ' + xhr.responseJSON.error);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
